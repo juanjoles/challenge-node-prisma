@@ -1,8 +1,14 @@
 import { Router, Request, Response, NextFunction } from "express";
 const {PrismaClient} = require('@prisma/client')
+import { celebrate, Joi, Segments } from 'celebrate'
 const prisma = new PrismaClient()
 const menuController = Router()
 
+const validateIdParameter = celebrate({
+    [Segments.PARAMS]: {
+      id: Joi.number().required(),
+    },
+  })
 
 menuController.post('/add', async(req:Request, res:Response) => {  
     
@@ -57,20 +63,6 @@ menuController.put('/update/:id',async(req:Request, res:Response) => {
     }
 })
 
-menuController.get('/:id', async(req:Request, res:Response) => {
-    try{
-        const {id} = req.params
-        const result = await prisma.$queryRaw `select * from menu where id = ${id}`;
-        if(result.length == 0) {
-            res.status(200).json({message:'El id seleccionado no existe.'})
-        }else{
-            res.status(200).json({message: result})
-        }           
-    }catch(err){
-        res.status(500).json({message: 'Internal Error'})
-    }
-})
-
 menuController.get('/all', async(req:Request, res:Response) => {
     try{
         const result = await prisma.menu.findMany({
@@ -86,5 +78,21 @@ menuController.get('/all', async(req:Request, res:Response) => {
         res.status(500).json({message: 'Internal Error'})
     }
 })
+
+menuController.get('/:id',validateIdParameter, async(req:Request, res:Response) => {
+    try{
+        const {id} = req.params
+        const result = await prisma.$queryRaw `select * from menu where id = ${id}`;
+        if(result.length == 0) {
+            res.status(200).json({message:'El id seleccionado no existe.'})
+        }else{
+            res.status(200).json({message: result})
+        }           
+    }catch(err){
+        res.status(500).json({message: 'Internal Error'})
+    }
+})
+
+
 
 export {menuController};

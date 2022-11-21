@@ -1,8 +1,8 @@
 import express from 'express';
-import { homeController } from './controllers/homeController';
+import { menuController } from './controllers/menuController';
 
 const Router = express.Router()
 
-Router.use('/menu', homeController);
+Router.use('/menus', menuController);
 
 export {Router};
